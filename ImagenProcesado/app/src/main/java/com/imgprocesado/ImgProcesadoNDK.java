@@ -183,6 +183,10 @@ public class ImgProcesadoNDK extends AppCompatActivity {
         ivDisplay.setImageBitmap(bitmapCambio);
     }
 
+    public static boolean hayPixel(int x, int y) {
+        return x%10 == y%10;
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri uri = null;

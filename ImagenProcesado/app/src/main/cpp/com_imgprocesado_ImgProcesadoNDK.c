@@ -201,21 +201,24 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco1
         LOGE("AndroidBitmap_lockPixels() fallo ! error=%d", ret);
     }
 
+    int borde = 10;
     // modificacion pixeles en el algoritmo de escala grises
     for (y = 0; y < infocolor.height; y++) {
         rgba *line = (rgba *) pixelscolor;
         rgba *marco1line = (rgba *) pixelsmarco1;
         for (x = 0; x < infocolor.width; x++) {
-            float outputRed = (line[x].red * .393)+(line[x].green * .769)+(line[x].blue * .189);
-            if (outputRed > 255) outputRed = 255;
-            float outputGreen = (line[x].red * .349)+(line[x].green * .686)+(line[x].blue * .168);
-            if (outputGreen > 255) outputGreen = 255;
-            float outputBlue = (line[x].red * .272)+(line[x].green * .534)+(line[x].blue * .131);
-            if (outputBlue > 255) outputBlue = 255;
-            marco1line[x].red = (uint8_t) outputRed;
-            marco1line[x].green = (uint8_t) outputGreen;
-            marco1line[x].blue = (uint8_t) outputBlue;
-            marco1line[x].alpha = line[x].alpha;
+            if(y<=borde || x<=borde || y>=(infocolor.height-borde) || x>=(infocolor.width-borde)){
+                //Se pone la marca
+                marco1line[x].red = (uint8_t) 0;
+                marco1line[x].green = (uint8_t) 0;
+                marco1line[x].blue = (uint8_t) 0;
+                marco1line[x].alpha = (uint8_t) 255;
+            }else{
+                marco1line[x].red = line[x].red;
+                marco1line[x].green = line[x].green;
+                marco1line[x].blue = line[x].blue;
+                marco1line[x].alpha = line[x].alpha;
+            }
         }
         pixelscolor = (char *) pixelscolor + infocolor.stride;
         pixelsmarco1 = (char *) pixelsmarco1 + infoMarco1.stride;
