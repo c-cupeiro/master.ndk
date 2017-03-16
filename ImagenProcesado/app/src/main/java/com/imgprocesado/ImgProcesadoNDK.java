@@ -44,7 +44,7 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     private static final int REQUEST_IMAGE_GALLERY = 2;
     private static Uri uriFichero;
 
-    private String tag = "ImgProcesadoNDK";
+    private static String tag = "ImgProcesadoNDK";
     private Bitmap bitmapOriginal = null;
     private Bitmap bitmapCambio = null;
     private ImageView ivDisplay = null;
@@ -184,6 +184,7 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     }
 
     public static boolean hayPixel(int x, int y) {
+        Log.i(tag, "ME meto en hayPixel");
         return x%10 == y%10;
     }
 

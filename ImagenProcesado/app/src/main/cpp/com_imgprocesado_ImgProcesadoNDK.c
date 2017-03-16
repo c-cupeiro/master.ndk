@@ -277,21 +277,46 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco2
         LOGE("AndroidBitmap_lockPixels() fallo ! error=%d", ret);
     }
 
+    int borde = 10;
     // modificacion pixeles en el algoritmo de escala grises
     for (y = 0; y < infocolor.height; y++) {
         rgba *line = (rgba *) pixelscolor;
-        rgba *sepiamarco2 = (rgba *) pixelsmarco2;
+        rgba *marco2line = (rgba *) pixelsmarco2;
         for (x = 0; x < infocolor.width; x++) {
-            float outputRed = (line[x].red * .393)+(line[x].green * .769)+(line[x].blue * .189);
-            if (outputRed > 255) outputRed = 255;
-            float outputGreen = (line[x].red * .349)+(line[x].green * .686)+(line[x].blue * .168);
-            if (outputGreen > 255) outputGreen = 255;
-            float outputBlue = (line[x].red * .272)+(line[x].green * .534)+(line[x].blue * .131);
-            if (outputBlue > 255) outputBlue = 255;
-            sepiamarco2[x].red = (uint8_t) outputRed;
-            sepiamarco2[x].green = (uint8_t) outputGreen;
-            sepiamarco2[x].blue = (uint8_t) outputBlue;
-            sepiamarco2[x].alpha = line[x].alpha;
+            if(y<=borde || x<=borde || y>=(infocolor.height-borde) || x>=(infocolor.width-borde)){
+                //Se pone la marca
+                jboolean result;
+                jclass clazz = (*env)->GetObjectClass(env, obj);
+                LOGI("Class: %d",clazz);
+                if (!clazz) {
+                    LOGE("callback_handler: FALLO object Class");
+                }
+                jmethodID method = (*env)->GetStaticMethodID(env, clazz, "hayPixel", "(II)Z");
+                LOGI("METODO: %d",method);
+                if (!method) {
+                    LOGE("callback_hand ler: FALLO metodo ID");
+                }else{
+                    result = (*env)->CallStaticBooleanMethod(env, obj, method,x,y);
+                }
+
+                //Seleccionar el color
+                int color;
+                if(result){
+                    color = 0;
+                }else{
+                    color = 255;
+                }
+
+                marco2line[x].red = (uint8_t) color;
+                marco2line[x].green = (uint8_t) color;
+                marco2line[x].blue = (uint8_t) color;
+                marco2line[x].alpha = (uint8_t) 255;
+            }else{
+                marco2line[x].red = line[x].red;
+                marco2line[x].green = line[x].green;
+                marco2line[x].blue = line[x].blue;
+                marco2line[x].alpha = line[x].alpha;
+            }
         }
         pixelscolor = (char *) pixelscolor + infocolor.stride;
         pixelsmarco2 = (char *) pixelsmarco2 + infomarco2.stride;
