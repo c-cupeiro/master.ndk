@@ -1,7 +1,11 @@
 package com.imgprocesado;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,8 +13,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class ImgProcesadoNDK extends AppCompatActivity {
+
+    private static final String[] PERMS_ALL={
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
+    };
+    private boolean isInPermission=false;
+    private static final int RESULT_PERMS_ALL=1;
 
     private String tag = "ImgProcesadoNDK";
     private Bitmap bitmapOriginal = null;
@@ -37,6 +55,9 @@ public class ImgProcesadoNDK extends AppCompatActivity {
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         bitmapOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.sampleimage, options);
         if (bitmapOriginal != null) ivDisplay.setImageBitmap(bitmapOriginal);
+
+        ActivityCompat.requestPermissions(this,
+                netPermissions(PERMS_ALL), RESULT_PERMS_ALL);
     }
 
     @Override
@@ -95,5 +116,44 @@ public class ImgProcesadoNDK extends AppCompatActivity {
         }
 
         ivDisplay.setImageBitmap(bitmapCambio);
+    }
+
+    //Permisos
+    private String[] netPermissions(String[] wanted) {
+        ArrayList<String> result=new ArrayList<String>();
+
+        for (String perm : wanted) {
+            if (!hasPermission(perm)) {
+                result.add(perm);
+            }
+        }
+
+        return(result.toArray(new String[result.size()]));
+    }
+
+    private boolean hasPermission(String perm) {
+        return(ContextCompat.checkSelfPermission(this, perm)==
+                PackageManager.PERMISSION_GRANTED);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions,
+                                           int[] grantResults) {
+        boolean noPermission=false;
+
+        isInPermission=false;
+
+        if (requestCode==RESULT_PERMS_ALL) {
+            String[] notpermission = netPermissions(PERMS_ALL);
+            if (notpermission.length>0) {
+                noPermission = true;
+            }
+        }
+        if (noPermission) {
+            Toast.makeText(this, R.string.msg_no_perm,
+                    Toast.LENGTH_LONG).show();
+            this.finish();
+        }
     }
 }
