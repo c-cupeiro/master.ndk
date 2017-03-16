@@ -1,9 +1,12 @@
 package com.imgprocesado;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -12,23 +15,29 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
 public class ImgProcesadoNDK extends AppCompatActivity {
 
-    private static final String[] PERMS_ALL={
+    private static final String[] PERMS_ALL = {
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET
     };
-    private boolean isInPermission=false;
-    private static final int RESULT_PERMS_ALL=1;
+    private boolean isInPermission = false;
+    private static final int RESULT_PERMS_ALL = 101;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_GALLERY = 2;
 
     private String tag = "ImgProcesadoNDK";
     private Bitmap bitmapOriginal = null;
@@ -40,8 +49,11 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     }
 
     public native void convertirGrises(Bitmap bitmapIn, Bitmap bitmapOut);
+
     public native void convertirSepia(Bitmap bitmapIn, Bitmap bitmapOut);
+
     public native void ponerMarco1(Bitmap bitmapIn, Bitmap bitmapOut);
+
     public native void ponerMarco2(Bitmap bitmapIn, Bitmap bitmapOut);
 
     @Override
@@ -56,8 +68,36 @@ public class ImgProcesadoNDK extends AppCompatActivity {
         bitmapOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.sampleimage, options);
         if (bitmapOriginal != null) ivDisplay.setImageBitmap(bitmapOriginal);
 
+        Button btn_foto = (Button) findViewById(R.id.btnFoto);
+        btn_foto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hacerFoto(v);
+            }
+        });
+        Button btn_gallery = (Button) findViewById(R.id.btnGaleria);
+        btn_gallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seleccionarGaleria(v);
+            }
+        });
+
         ActivityCompat.requestPermissions(this,
                 netPermissions(PERMS_ALL), RESULT_PERMS_ALL);
+    }
+
+    private void hacerFoto(View v) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+
+    }
+
+    private void seleccionarGaleria(View v) {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, REQUEST_IMAGE_GALLERY);
     }
 
     @Override
@@ -69,7 +109,7 @@ public class ImgProcesadoNDK extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.opt_resetImg:
                 onResetImagen();
                 return true;
@@ -96,7 +136,7 @@ public class ImgProcesadoNDK extends AppCompatActivity {
 
     public void onConvertir(int option) {
         bitmapCambio = Bitmap.createBitmap(bitmapOriginal.getWidth(), bitmapOriginal.getHeight(), Bitmap.Config.ARGB_8888);
-        switch (option){
+        switch (option) {
             case 0://GRIS
                 Log.i(tag, "Conversion a escala de grises");
                 convertirGrises(bitmapOriginal, bitmapCambio);
@@ -118,9 +158,27 @@ public class ImgProcesadoNDK extends AppCompatActivity {
         ivDisplay.setImageBitmap(bitmapCambio);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            bitmapOriginal = (Bitmap) extras.get("data");
+        }
+        if (requestCode == REQUEST_IMAGE_GALLERY && resultCode == RESULT_OK) {
+            Uri uri = data.getData();
+            try {
+                bitmapOriginal = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+            } catch (IOException e) {
+                bitmapOriginal = null;
+                Toast.makeText(this, R.string.error_gallery,Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+
     //Permisos
     private String[] netPermissions(String[] wanted) {
-        ArrayList<String> result=new ArrayList<String>();
+        ArrayList<String> result = new ArrayList<String>();
 
         for (String perm : wanted) {
             if (!hasPermission(perm)) {
@@ -128,11 +186,11 @@ public class ImgProcesadoNDK extends AppCompatActivity {
             }
         }
 
-        return(result.toArray(new String[result.size()]));
+        return (result.toArray(new String[result.size()]));
     }
 
     private boolean hasPermission(String perm) {
-        return(ContextCompat.checkSelfPermission(this, perm)==
+        return (ContextCompat.checkSelfPermission(this, perm) ==
                 PackageManager.PERMISSION_GRANTED);
     }
 
@@ -140,13 +198,13 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions,
                                            int[] grantResults) {
-        boolean noPermission=false;
+        boolean noPermission = false;
 
-        isInPermission=false;
+        isInPermission = false;
 
-        if (requestCode==RESULT_PERMS_ALL) {
+        if (requestCode == RESULT_PERMS_ALL) {
             String[] notpermission = netPermissions(PERMS_ALL);
-            if (notpermission.length>0) {
+            if (notpermission.length > 0) {
                 noPermission = true;
             }
         }
