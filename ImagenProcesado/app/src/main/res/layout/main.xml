@@ -9,23 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
         <Button
-            android:id="@+id/btnReset"
+            android:id="@+id/btnFoto"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Original" />
+            android:text="Sacar Foto" />
         <Button
-            android:id="@+id/btnGris"
+            android:id="@+id/btnGaleria"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grises" />
-        <Button
-            android:id="@+id/btnSepia"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sepia" />
+            android:text="Galería" />
     </LinearLayout>
     <ImageView
         android:layout_width="wrap_content"

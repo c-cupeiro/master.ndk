@@ -17,6 +17,10 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_convertirGrises
 
 JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_convertirSepia
         (JNIEnv *, jobject, jobject, jobject);
+JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco1
+        (JNIEnv *, jobject, jobject, jobject);
+JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco2
+        (JNIEnv *, jobject, jobject, jobject);
 
 #ifdef __cplusplus
 }

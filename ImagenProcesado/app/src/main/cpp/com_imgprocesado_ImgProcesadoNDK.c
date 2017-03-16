@@ -128,7 +128,7 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_convertirSepia
         LOGE("AndroidBitmap_lockPixels() fallo ! error=%d", ret);
     }
 
-    // modificacion pixeles en el algoritmo de escala grises
+    // modificacion pixeles en el algoritmo de sepia
     for (y = 0; y < infocolor.height; y++) {
         rgba *line = (rgba *) pixelscolor;
         rgba *sepialine = (rgba *) pixelssepia;
@@ -151,5 +151,151 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_convertirSepia
     LOGI("unlocking pixels");
     AndroidBitmap_unlockPixels(env, bitmapcolor);
     AndroidBitmap_unlockPixels(env, bitmapsepia);
+
+}
+
+/*Conversion a Marco1 por pixel*/
+JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco1
+        (JNIEnv *env, jobject obj, jobject bitmapcolor, jobject bitmapmarco1) {
+
+    AndroidBitmapInfo infocolor;
+    void *pixelscolor;
+    AndroidBitmapInfo infoMarco1;
+    void *pixelsmarco1;
+    int ret;
+    int y;
+    int x;
+    LOGI("convertirSepia");
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmapcolor, &infocolor)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmapmarco1, &infoMarco1)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    LOGI("imagen color :: ancho %d;alto %d;avance %d;formato %d;flags %d", infocolor.width,
+         infocolor.height, infocolor.stride,
+         infocolor.format, infocolor.flags);
+    if (infocolor.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap no es formato RGBA_8888 !");
+        return;
+    }
+
+    LOGI("imagen sepia :: ancho %d;alto %d;avance %d;formato %d;flags %d", infoMarco1.width,
+         infoMarco1.height, infoMarco1.stride,
+         infoMarco1.format, infoMarco1.flags);
+    if (infoMarco1.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap no es formato RGBA_8888 !");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmapcolor, &pixelscolor)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmapmarco1, &pixelsmarco1)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() fallo ! error=%d", ret);
+    }
+
+    // modificacion pixeles en el algoritmo de escala grises
+    for (y = 0; y < infocolor.height; y++) {
+        rgba *line = (rgba *) pixelscolor;
+        rgba *marco1line = (rgba *) pixelsmarco1;
+        for (x = 0; x < infocolor.width; x++) {
+            float outputRed = (line[x].red * .393)+(line[x].green * .769)+(line[x].blue * .189);
+            if (outputRed > 255) outputRed = 255;
+            float outputGreen = (line[x].red * .349)+(line[x].green * .686)+(line[x].blue * .168);
+            if (outputGreen > 255) outputGreen = 255;
+            float outputBlue = (line[x].red * .272)+(line[x].green * .534)+(line[x].blue * .131);
+            if (outputBlue > 255) outputBlue = 255;
+            marco1line[x].red = (uint8_t) outputRed;
+            marco1line[x].green = (uint8_t) outputGreen;
+            marco1line[x].blue = (uint8_t) outputBlue;
+            marco1line[x].alpha = line[x].alpha;
+        }
+        pixelscolor = (char *) pixelscolor + infocolor.stride;
+        pixelsmarco1 = (char *) pixelsmarco1 + infoMarco1.stride;
+    }
+
+    LOGI("unlocking pixels");
+    AndroidBitmap_unlockPixels(env, bitmapcolor);
+    AndroidBitmap_unlockPixels(env, bitmapmarco1);
+
+}
+
+/*Conversion a Marco2 por pixel*/
+JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco2
+        (JNIEnv *env, jobject obj, jobject bitmapcolor, jobject bitmapmarco2) {
+
+    AndroidBitmapInfo infocolor;
+    void *pixelscolor;
+    AndroidBitmapInfo infomarco2;
+    void *pixelsmarco2;
+    int ret;
+    int y;
+    int x;
+    LOGI("convertirSepia");
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmapcolor, &infocolor)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmapmarco2, &infomarco2)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    LOGI("imagen color :: ancho %d;alto %d;avance %d;formato %d;flags %d", infocolor.width,
+         infocolor.height, infocolor.stride,
+         infocolor.format, infocolor.flags);
+    if (infocolor.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap no es formato RGBA_8888 !");
+        return;
+    }
+
+    LOGI("imagen sepia :: ancho %d;alto %d;avance %d;formato %d;flags %d", infomarco2.width,
+         infomarco2.height, infomarco2.stride,
+         infomarco2.format, infomarco2.flags);
+    if (infomarco2.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap no es formato RGBA_8888 !");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmapcolor, &pixelscolor)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmapmarco2, &pixelsmarco2)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() fallo ! error=%d", ret);
+    }
+
+    // modificacion pixeles en el algoritmo de escala grises
+    for (y = 0; y < infocolor.height; y++) {
+        rgba *line = (rgba *) pixelscolor;
+        rgba *sepiamarco2 = (rgba *) pixelsmarco2;
+        for (x = 0; x < infocolor.width; x++) {
+            float outputRed = (line[x].red * .393)+(line[x].green * .769)+(line[x].blue * .189);
+            if (outputRed > 255) outputRed = 255;
+            float outputGreen = (line[x].red * .349)+(line[x].green * .686)+(line[x].blue * .168);
+            if (outputGreen > 255) outputGreen = 255;
+            float outputBlue = (line[x].red * .272)+(line[x].green * .534)+(line[x].blue * .131);
+            if (outputBlue > 255) outputBlue = 255;
+            sepiamarco2[x].red = (uint8_t) outputRed;
+            sepiamarco2[x].green = (uint8_t) outputGreen;
+            sepiamarco2[x].blue = (uint8_t) outputBlue;
+            sepiamarco2[x].alpha = line[x].alpha;
+        }
+        pixelscolor = (char *) pixelscolor + infocolor.stride;
+        pixelsmarco2 = (char *) pixelsmarco2 + infomarco2.stride;
+    }
+
+    LOGI("unlocking pixels");
+    AndroidBitmap_unlockPixels(env, bitmapcolor);
+    AndroidBitmap_unlockPixels(env, bitmapmarco2);
 
 }

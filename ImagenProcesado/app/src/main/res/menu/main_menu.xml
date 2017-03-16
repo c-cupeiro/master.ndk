@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ImgProcesadoNDK">
+    <item
+        android:id="@+id/opt_resetImg"
+        android:orderInCategory="90"
+        android:title="Resetear Imagen"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/opt_gris"
+        android:orderInCategory="95"
+        android:title="Imagen Gris"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/opt_sepia"
+        android:orderInCategory="110"
+        android:title="Imagen Sepia"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/opt_marco1"
+        android:orderInCategory="115"
+        android:title="Imagen Marco 1"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/opt_marco2"
+        android:orderInCategory="120"
+        android:title="Imagen Marco 2"
+        app:showAsAction="never" />
+</menu>
