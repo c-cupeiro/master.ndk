@@ -2,4 +2,5 @@
     <string name="app_name">ImgProcesado</string>
     <string name="msg_no_perm">La aplicación no tiene permisos. Se cierra</string>
     <string name="error_gallery">Error al cargar la imagen</string>
+    <string name="facebook_app_id">1492011124204498</string>
 </resources>

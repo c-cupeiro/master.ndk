@@ -36,7 +36,8 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     private static final String[] PERMS_ALL = {
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE
     };
     private boolean isInPermission = false;
     private static final int RESULT_PERMS_ALL = 101;
