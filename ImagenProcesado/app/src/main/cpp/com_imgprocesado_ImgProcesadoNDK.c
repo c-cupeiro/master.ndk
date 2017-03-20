@@ -278,6 +278,16 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco2
     }
 
     int borde = 10;
+    jclass clazz = (*env)->GetObjectClass(env, obj);
+    LOGI("Class: %d",clazz);
+    if (!clazz) {
+        LOGE("callback_handler: FALLO object Class");
+    }
+    jmethodID method = (*env)->GetStaticMethodID(env, clazz, "hayPixel", "(II)Z");
+    LOGI("METODO: %d",method);
+    if (!method) {
+        LOGE("callback_hand ler: FALLO metodo ID");
+    }
     // modificacion pixeles en el algoritmo de escala grises
     for (y = 0; y < infocolor.height; y++) {
         rgba *line = (rgba *) pixelscolor;
@@ -285,20 +295,7 @@ JNIEXPORT void JNICALL Java_com_imgprocesado_ImgProcesadoNDK_ponerMarco2
         for (x = 0; x < infocolor.width; x++) {
             if(y<=borde || x<=borde || y>=(infocolor.height-borde) || x>=(infocolor.width-borde)){
                 //Se pone la marca
-                jboolean result;
-                jclass clazz = (*env)->GetObjectClass(env, obj);
-                LOGI("Class: %d",clazz);
-                if (!clazz) {
-                    LOGE("callback_handler: FALLO object Class");
-                }
-                jmethodID method = (*env)->GetStaticMethodID(env, clazz, "hayPixel", "(II)Z");
-                LOGI("METODO: %d",method);
-                if (!method) {
-                    LOGE("callback_hand ler: FALLO metodo ID");
-                }else{
-                    result = (*env)->CallStaticBooleanMethod(env, obj, method,x,y);
-                }
-
+                jboolean result = (*env)->CallStaticBooleanMethod(env, clazz, method,x,y);
                 //Seleccionar el color
                 int color;
                 if(result){

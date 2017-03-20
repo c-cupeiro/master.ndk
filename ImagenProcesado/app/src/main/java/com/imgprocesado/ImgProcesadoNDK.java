@@ -184,7 +184,6 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     }
 
     public static boolean hayPixel(int x, int y) {
-        Log.i(tag, "ME meto en hayPixel");
         return x%10 == y%10;
     }
 
