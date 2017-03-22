@@ -28,6 +28,10 @@ import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -48,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
     private CallbackManager elCallbackManagerDeFacebook;
     private AccessTokenTracker accessTokenTracker;
+    private ShareDialog elShareDialog;
     private final Activity THIS = this;
     private static final int RESULT_SHARE_FOTO = 101;
     private static final int RESULT_SHARE_FOTO_SHARE_DIALOG = 102;
@@ -146,7 +151,23 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+        this.elShareDialog = new ShareDialog(this);
+        this.elShareDialog.registerCallback(this.elCallbackManagerDeFacebook,
+                new FacebookCallback<Sharer.Result>() {
+                    @Override
+                    public void onSuccess(Sharer.Result result) {
+                        Toast.makeText(THIS, "Sharer onSuccess()", Toast.LENGTH_LONG).show();
+                    }
 
+                    @Override
+                    public void onCancel() {
+                    }
+
+                    @Override
+                    public void onError(FacebookException error) {
+                        Toast.makeText(THIS, "Sharer onError(): " + error.toString(), Toast.LENGTH_LONG).show();
+                    }
+                });
         actualizarVentanita();
     }
 
@@ -169,10 +190,11 @@ public class MainActivity extends AppCompatActivity {
                 switch (requestCode) {
                     case RESULT_SHARE_FOTO:
                         //Enviar foto por la api de FB
-                        this.enviarFotoAFacebook_async(bmp,texto);
+                        enviarFotoAFacebook_async(bmp, texto);
                         break;
                     case RESULT_SHARE_FOTO_SHARE_DIALOG:
                         //Enviar foto por share dialog
+                        enviarFotoSharedialog(bmp);
                         break;
                     case RESULT_SHARE_FOTO_TW:
                         //Enviar foto a twitter
@@ -206,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
             btn_CompartirFB.setVisibility(View.INVISIBLE);
             btn_CompartirFoto.setVisibility(View.INVISIBLE);
             btn_CompartirFotoShareDialog.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             Log.d("ActualizarVentanita", "hay sesion");
             tv_post.setVisibility(View.VISIBLE);
             et_textoCompartir.setVisibility(View.VISIBLE);
@@ -248,6 +270,10 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private boolean puedoUtilizarShareDialogParaPublicarFoto() {
+        return ShareDialog.canShow(SharePhotoContent.class);
     }
 
     private boolean tengoPermisoParaPublicar() {
@@ -337,4 +363,11 @@ public class MainActivity extends AppCompatActivity {
         );
         request.executeAsync();
     } // ()
+
+    private void enviarFotoSharedialog(Bitmap image) {
+        if ( ! puedoUtilizarShareDialogParaPublicarFoto() ) { return; }
+        SharePhoto photo = new SharePhoto.Builder().setBitmap(image).build();
+        SharePhotoContent content = new SharePhotoContent.Builder().addPhoto(photo).build();
+        this.elShareDialog.show(content);
+    }
 }
