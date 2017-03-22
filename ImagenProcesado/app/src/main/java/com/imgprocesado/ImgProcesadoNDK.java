@@ -1,10 +1,12 @@
 package com.imgprocesado;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -21,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,7 +32,10 @@ import java.util.Locale;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.R.attr.id;
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
+import static android.icu.text.RelativeDateTimeFormatter.Direction.THIS;
+import static android.os.Build.VERSION_CODES.M;
 
 public class ImgProcesadoNDK extends AppCompatActivity {
 
@@ -43,6 +49,7 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     private static final int RESULT_PERMS_ALL = 101;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_GALLERY = 2;
+    public static final String IMAGE_KEY = "imagen";
     private static Uri uriFichero;
 
     private static String tag = "ImgProcesadoNDK";
@@ -66,6 +73,8 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        if(getSupportActionBar()!=null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Log.i(tag, "Imagen antes de modificar");
         ivDisplay = (ImageView) findViewById(R.id.ivDisplay);
         setDefaultImage();
@@ -85,6 +94,13 @@ public class ImgProcesadoNDK extends AppCompatActivity {
                 seleccionarGaleria(v);
             }
         });
+        Button btn_enviar = (Button) findViewById(R.id.btnEnviar);
+        btn_enviar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enviarFoto();
+            }
+        });
 
         ActivityCompat.requestPermissions(this,
                 netPermissions(PERMS_ALL), RESULT_PERMS_ALL);
@@ -97,6 +113,30 @@ public class ImgProcesadoNDK extends AppCompatActivity {
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             bitmapOriginal = BitmapFactory.decodeResource(this.getResources(), R.drawable.sampleimage, options);
         }
+    }
+
+    private void enviarFoto(){
+        try {
+            //Write file
+            String filename = "bitmap.png";
+            FileOutputStream stream = this.openFileOutput(filename, Context.MODE_PRIVATE);
+            Bitmap image = ((BitmapDrawable)ivDisplay.getDrawable()).getBitmap();
+            image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+            //Cleanup
+            stream.close();
+            image.recycle();
+
+            Intent intent_resul = new Intent();
+            intent_resul.putExtra(IMAGE_KEY,filename);
+            setResult(RESULT_OK,intent_resul);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error al enviar la foto al MainActivity", Toast.LENGTH_LONG).show();
+            setResult(RESULT_CANCELED);
+        }
+
     }
 
     private void hacerFoto(View v) {
@@ -151,6 +191,10 @@ public class ImgProcesadoNDK extends AppCompatActivity {
             case R.id.opt_marco2:
                 onConvertir(3);
                 return true;
+            case android.R.id.home:
+                finish();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }

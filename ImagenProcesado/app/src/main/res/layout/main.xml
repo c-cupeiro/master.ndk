@@ -20,6 +20,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Galería" />
+        <Button
+            android:id="@+id/btnEnviar"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enviar" />
     </LinearLayout>
     <ImageView
         android:layout_width="wrap_content"
