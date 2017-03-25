@@ -32,16 +32,6 @@ import java.util.Locale;
 
 public class ImgProcesadoNDK extends AppCompatActivity {
 
-    private static final String[] PERMS_ALL = {
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE
-    };
-    private boolean isInPermission = false;
-    private static final int RESULT_PERMS_ALL = 101;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int REQUEST_IMAGE_GALLERY = 2;
     public static final String IMAGE_KEY = "imagen";
     private static Uri uriFichero;
 
@@ -49,6 +39,9 @@ public class ImgProcesadoNDK extends AppCompatActivity {
     private Bitmap bitmapOriginal = null;
     private Bitmap bitmapCambio = null;
     private ImageView ivDisplay = null;
+
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_GALLERY = 2;
 
     static {
         System.loadLibrary("imgprocesado");
@@ -94,9 +87,6 @@ public class ImgProcesadoNDK extends AppCompatActivity {
                 enviarFoto();
             }
         });
-
-        ActivityCompat.requestPermissions(this,
-                netPermissions(PERMS_ALL), RESULT_PERMS_ALL);
     }
 
     private void setDefaultImage() {
@@ -256,45 +246,6 @@ public class ImgProcesadoNDK extends AppCompatActivity {
             }
         }else{
             Toast.makeText(this, R.string.error_gallery, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //Permisos
-    private String[] netPermissions(String[] wanted) {
-        ArrayList<String> result = new ArrayList<String>();
-
-        for (String perm : wanted) {
-            if (!hasPermission(perm)) {
-                result.add(perm);
-            }
-        }
-
-        return (result.toArray(new String[result.size()]));
-    }
-
-    private boolean hasPermission(String perm) {
-        return (ContextCompat.checkSelfPermission(this, perm) ==
-                PackageManager.PERMISSION_GRANTED);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions,
-                                           int[] grantResults) {
-        boolean noPermission = false;
-
-        isInPermission = false;
-
-        if (requestCode == RESULT_PERMS_ALL) {
-            String[] notpermission = netPermissions(PERMS_ALL);
-            if (notpermission.length > 0) {
-                noPermission = true;
-            }
-        }
-        if (noPermission) {
-            Toast.makeText(this, R.string.msg_no_perm,
-                    Toast.LENGTH_LONG).show();
-            this.finish();
         }
     }
 }

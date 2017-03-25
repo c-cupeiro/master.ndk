@@ -1,15 +1,18 @@
 package com.imgprocesado;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,20 +49,15 @@ import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
-import com.twitter.sdk.android.core.models.Media;
-import com.twitter.sdk.android.core.models.Tweet;
-import com.twitter.sdk.android.core.services.MediaService;
-import com.twitter.sdk.android.core.services.StatusesService;
 import com.twitter.sdk.android.tweetcomposer.TweetComposer;
 
 import io.fabric.sdk.android.Fabric;
-import okhttp3.MediaType;
-import retrofit2.Call;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
@@ -82,8 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_CompartirFotoShareDialog;
     private Button btn_CompartirFotoTW;
 
-    private TwitterSession sesionTwitter;
-
     private CallbackManager elCallbackManagerDeFacebook;
     private AccessTokenTracker accessTokenTracker;
     private ShareDialog elShareDialog;
@@ -92,10 +88,20 @@ public class MainActivity extends AppCompatActivity {
     private static final int RESULT_SHARE_FOTO = 101;
     private static final int RESULT_SHARE_FOTO_SHARE_DIALOG = 102;
     private static final int RESULT_SHARE_FOTO_TW = 103;
+    private static final String[] PERMS_ALL = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE
+    };
+    private boolean isInPermission = false;
+    private static final int RESULT_PERMS_ALL = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityCompat.requestPermissions(this,
+                netPermissions(PERMS_ALL), RESULT_PERMS_ALL);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(this, new Twitter(authConfig),new TweetComposer());
         setContentView(R.layout.activity_main);
@@ -109,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
             public void success(Result<TwitterSession> result) {
                 Toast.makeText(THIS, "Autenticado en twitter: " + result.data.getUserName(), Toast.LENGTH_LONG).show();
                 loginTW=true;
-                sesionTwitter = result.data;
                 //Poner el nombre del usuario
                 tv_UserNameTW.setText(result.data.getUserName());
                 actualizarVentanita();
@@ -119,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             public void failure(TwitterException e) {
                 Toast.makeText(THIS, "Fallo en autentificación: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 loginTW=true;
-                sesionTwitter = null;
                 actualizarVentanita();
             }
         });
@@ -210,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                         actualizarVentanita();
                     }
                 });
-        //Para quitar los botones al hacer logout
+        //Para quitar los botones al hacer logout en FB
         accessTokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken,
@@ -239,6 +243,45 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         actualizarVentanita();
+    }
+
+    //Permisos
+    private String[] netPermissions(String[] wanted) {
+        ArrayList<String> result = new ArrayList<String>();
+
+        for (String perm : wanted) {
+            if (!hasPermission(perm)) {
+                result.add(perm);
+            }
+        }
+
+        return (result.toArray(new String[result.size()]));
+    }
+
+    private boolean hasPermission(String perm) {
+        return (ContextCompat.checkSelfPermission(this, perm) ==
+                PackageManager.PERMISSION_GRANTED);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions,
+                                           int[] grantResults) {
+        boolean noPermission = false;
+
+        isInPermission = false;
+
+        if (requestCode == RESULT_PERMS_ALL) {
+            String[] notpermission = netPermissions(PERMS_ALL);
+            if (notpermission.length > 0) {
+                noPermission = true;
+            }
+        }
+        if (noPermission) {
+            Toast.makeText(this, R.string.msg_no_perm,
+                    Toast.LENGTH_LONG).show();
+            this.finish();
+        }
     }
 
     private void logoutTwitter() {
@@ -313,9 +356,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void actualizarVentanita() {
         Log.d("ActualizarVentanita", "empiezo");
-//
-// obtengo el access token para ver si hay sesión
-//
+
         //FACEBOOK
         AccessToken accessToken = this.obtenerAccessToken();
         if (accessToken == null) {
@@ -361,19 +402,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private boolean sePuedePublicar() {
-//
-// compruebo la red
-//
         if (!this.hayRed()) {
             Toast.makeText(this, "¿no hay red? No puedo publicar", Toast.LENGTH_LONG).show();
             return false;
         }
-//
-// compruebo permisos
-//
         if (!this.tengoPermisoParaPublicar()) {
             Toast.makeText(this, "¿no tengo permisos para publicar? Los pido.", Toast.LENGTH_LONG).show();
-            // pedirPermisoParaPublicar();
             LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_actions"));
             return false;
         }
@@ -444,7 +478,6 @@ public class MainActivity extends AppCompatActivity {
 //
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.PNG, 100, stream);
-//image.recycle ();
         final byte[] byteArray = stream.toByteArray();
         try {
             stream.close();
@@ -456,7 +489,6 @@ public class MainActivity extends AppCompatActivity {
         Bundle params = new Bundle();
         params.putByteArray("source", byteArray); // bytes de la imagen
         params.putString("caption", comentario); // comentario
-// si se quisiera publicar una imagen de internet: params.putString("url", "{image-url}");
         GraphRequest request = new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
                 "/me/photos",
@@ -465,7 +497,6 @@ public class MainActivity extends AppCompatActivity {
                 new GraphRequest.Callback() {
                     public void onCompleted(GraphResponse response) {
                         Toast.makeText(THIS, "" + byteArray.length + " Foto enviada: " + response.toString(), Toast.LENGTH_LONG).show();
-//textoConElMensaje.setText(response.toString());
                     }
                 }
         );
