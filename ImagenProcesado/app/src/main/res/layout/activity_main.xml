@@ -26,6 +26,7 @@
             android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
             android:text="--" />
     </LinearLayout>
+
     <com.facebook.login.widget.LoginButton
         android:id="@+id/login_button"
         android:layout_width="wrap_content"
@@ -33,6 +34,7 @@
         android:layout_gravity="center"
         facebook:com_facebook_confirm_logout="false"
         facebook:com_facebook_tooltip_mode="never_display" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,14 +54,25 @@
             android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
             android:text="--" />
     </LinearLayout>
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/login_button_TW"
-        android:layout_width="wrap_content"
-        android:layout_height="121dp"
-        android:layout_gravity="center"
-        facebook:com_facebook_confirm_logout="false"
-        facebook:com_facebook_tooltip_mode="never_display" />
 
+    <com.twitter.sdk.android.core.identity.TwitterLoginButton
+        android:id="@+id/twitter_login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+    <Button
+        android:id="@+id/twitter_logout_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout Twitter"
+        android:layout_gravity="center"
+        android:paddingLeft="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:paddingRight="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:textColor="@android:color/white"
+        android:drawableLeft="@drawable/tw__ic_logo_default"
+        android:textAppearance="@style/tw__Button"
+        android:background="@drawable/logout_tw_button"
+        android:visibility="gone"/>
 
 
     <TextView
@@ -99,18 +112,21 @@
             android:layout_weight="2"
             android:text="Compartir TW" />
     </LinearLayout>
+
     <Button
         android:id="@+id/btn_compartirFoto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
         android:text="Subir Foto a FACEBOOK" />
+
     <Button
         android:id="@+id/btn_compartirFotoShareDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
         android:text="Subir Foto a FACEBOOK SHARE DIALOG" />
+
     <Button
         android:id="@+id/btn_compartirFotoTW"
         android:layout_width="match_parent"
