@@ -1,7 +1,6 @@
 package com.imgprocesado;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -30,12 +29,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import static android.Manifest.permission.RECORD_AUDIO;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.R.attr.id;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
-import static android.icu.text.RelativeDateTimeFormatter.Direction.THIS;
-import static android.os.Build.VERSION_CODES.M;
 
 public class ImgProcesadoNDK extends AppCompatActivity {
 
@@ -119,7 +112,18 @@ public class ImgProcesadoNDK extends AppCompatActivity {
         try {
             //Write file
             String filename = "bitmap.png";
-            FileOutputStream stream = this.openFileOutput(filename, Context.MODE_PRIVATE);
+            String baseFolder;
+            if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                baseFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+            }
+// revert to using internal storage (not sure if there's an equivalent to the above)
+            else {
+                baseFolder = this.getFilesDir().getAbsolutePath();
+            }
+            File file = new File(baseFolder + File.separator + filename);
+            file.getParentFile().mkdirs();
+            //FileOutputStream stream = this.openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream stream = new FileOutputStream(file);
             Bitmap image = ((BitmapDrawable)ivDisplay.getDrawable()).getBitmap();
             image.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
@@ -128,7 +132,7 @@ public class ImgProcesadoNDK extends AppCompatActivity {
             image.recycle();
 
             Intent intent_resul = new Intent();
-            intent_resul.putExtra(IMAGE_KEY,filename);
+            intent_resul.putExtra(IMAGE_KEY,file.getAbsolutePath());
             setResult(RESULT_OK,intent_resul);
             finish();
         } catch (Exception e) {

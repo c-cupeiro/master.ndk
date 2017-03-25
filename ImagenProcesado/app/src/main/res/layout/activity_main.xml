@@ -16,14 +16,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:text="USUARIO FB: " />
 
         <TextView
             android:id="@+id/tv_userName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:text="--" />
     </LinearLayout>
 
@@ -44,14 +44,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:text="USUARIO TW: " />
 
         <TextView
             android:id="@+id/tv_userNameTW"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:text="--" />
     </LinearLayout>
 
@@ -66,8 +66,8 @@
         android:layout_height="wrap_content"
         android:text="Logout Twitter"
         android:layout_gravity="center"
-        android:paddingLeft="@dimen/com_facebook_tooltip_horizontal_padding"
-        android:paddingRight="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
         android:textColor="@android:color/white"
         android:drawableLeft="@drawable/tw__ic_logo_default"
         android:textAppearance="@style/tw__Button"
@@ -79,7 +79,7 @@
         android:id="@+id/tv_post"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         android:text="Escribe un nuevo post:"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
@@ -87,7 +87,7 @@
         android:id="@+id/et_textoCompartir"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         android:hint="Escribe algo" />
 
     <LinearLayout
@@ -100,7 +100,7 @@
             android:id="@+id/btn_compartir"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:layout_weight="2"
             android:text="Compartir FB" />
 
@@ -108,7 +108,7 @@
             android:id="@+id/btn_compartirTW"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+            android:layout_margin="@dimen/activity_horizontal_margin"
             android:layout_weight="2"
             android:text="Compartir TW" />
     </LinearLayout>
@@ -117,22 +117,22 @@
         android:id="@+id/btn_compartirFoto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         android:text="Subir Foto a FACEBOOK" />
 
     <Button
         android:id="@+id/btn_compartirFotoShareDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         android:text="Subir Foto a FACEBOOK SHARE DIALOG" />
 
     <Button
         android:id="@+id/btn_compartirFotoTW"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/com_facebook_tooltip_horizontal_padding"
-        android:text="Subir Foto a FACEBOOK SHARE DIALOG" />
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="Subir Foto a TWITTER" />
 
 
 </LinearLayout>

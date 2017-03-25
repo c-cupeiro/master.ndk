@@ -7,7 +7,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,6 +50,7 @@ import com.twitter.sdk.android.core.models.Media;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.MediaService;
 import com.twitter.sdk.android.core.services.StatusesService;
+import com.twitter.sdk.android.tweetcomposer.TweetComposer;
 
 import io.fabric.sdk.android.Fabric;
 import okhttp3.MediaType;
@@ -79,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_CompartirFotoShareDialog;
     private Button btn_CompartirFotoTW;
 
+    private TwitterSession sesionTwitter;
+
     private CallbackManager elCallbackManagerDeFacebook;
     private AccessTokenTracker accessTokenTracker;
     private ShareDialog elShareDialog;
@@ -92,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
-        Fabric.with(this, new Twitter(authConfig));
+        Fabric.with(this, new Twitter(authConfig),new TweetComposer());
         setContentView(R.layout.activity_main);
         //Botón FB
         loginButtonOficial = (LoginButton) findViewById(R.id.login_button);
@@ -104,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
             public void success(Result<TwitterSession> result) {
                 Toast.makeText(THIS, "Autenticado en twitter: " + result.data.getUserName(), Toast.LENGTH_LONG).show();
                 loginTW=true;
+                sesionTwitter = result.data;
                 //Poner el nombre del usuario
                 tv_UserNameTW.setText(result.data.getUserName());
                 actualizarVentanita();
@@ -113,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
             public void failure(TwitterException e) {
                 Toast.makeText(THIS, "Fallo en autentificación: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 loginTW=true;
+                sesionTwitter = null;
                 actualizarVentanita();
             }
         });
@@ -150,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 String texto = et_textoCompartir.getText().toString();
                 if (!texto.equals("")) {
                     //Enviar a Twitter
-                    enviarTweet(texto);
+                    enviarTweet(texto,null);
                 } else {
                     Toast.makeText(THIS, "Rellena el texto", Toast.LENGTH_LONG).show();
                 }
@@ -262,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        Log.d("cuandrav.onActivityResu", "llamado");
+        Log.d("Main.onActivityResu", "llamado");
 
         super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == RESULT_SHARE_FOTO ||
@@ -273,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             String filename = data.getStringExtra(ImgProcesadoNDK.IMAGE_KEY);
             String texto = et_textoCompartir.getText().toString();
             try {
-                FileInputStream is = this.openFileInput(filename);
+                FileInputStream is = new FileInputStream(new File(filename));
                 bmp = BitmapFactory.decodeStream(is);
                 is.close();
                 switch (requestCode) {
@@ -287,12 +294,13 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case RESULT_SHARE_FOTO_TW:
                         //Enviar foto a twitter
+                        enviarTweet(texto,filename);
                         break;
                 }
                 Toast.makeText(THIS, "Imagen enviada correctamente",
                         Toast.LENGTH_LONG).show();
             } catch (Exception e) {
-                Log.e("cuandrav.onActivityResu", "Error al cargar la imagen del fichero " + filename);
+                Log.e("Main.onActivityResu", "Error al cargar la imagen del fichero " + filename);
                 Toast.makeText(THIS, "Fallo al Enviar la imagen: " + e.getMessage(),
                         Toast.LENGTH_LONG).show();
             }
@@ -419,10 +427,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void enviarFotoAFacebook_async(Bitmap image, String comentario) {
-        Log.d("cuandrav.envFotoFBasync", "llamado");
+        Log.d("Main.envFotoFBasync", "llamado");
         if (image == null) {
             Toast.makeText(this, "Enviar foto: la imagen está vacía.", Toast.LENGTH_LONG).show();
-            Log.d("cuandrav.envFotoFBasync", "acabo porque la imagen es null");
+            Log.d("Main.envFotoFBasync", "acabo porque la imagen es null");
             return;
         }
 //
@@ -474,81 +482,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Enviar a TWITTER
-
-    private void enviarTweet(String texto) {
-        StatusesService statusesService = Twitter.getApiClient( obtenerSesionDeTwitter() ).getStatusesService();
-        Call<Tweet> call = statusesService.update(texto, null, null, null, null, null, null, null, null);
-        call.enqueue(new Callback<Tweet>() {
-            @Override
-            public void success(Result<Tweet> result) {
-                Toast.makeText(THIS, "Tweet publicado: "+ result.response.message(), Toast.LENGTH_LONG).show();
+    private void enviarTweet(String texto, String filepath) {
+        try{
+            TweetComposer.Builder builder = new TweetComposer.Builder(this)
+                    .text(texto);
+            if(filepath!=null){
+                Uri uriFoto = Uri.fromFile(new File(filepath));
+                builder.image(uriFoto);
             }
-            @Override
-            public void failure(TwitterException e) {
-                Toast.makeText(THIS, "No se pudo publicar el tweet: "+ e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+            builder.show();
+        }catch (Exception e){
+            Log.e("Main.enviarTweet", "error al enviar el tweet: "+e.getMessage());
+            Toast.makeText(THIS, "Error al enviar el tweet", Toast.LENGTH_LONG).show();
+        }
     }
 
-    private TwitterSession obtenerSesionDeTwitter() {
-        return Twitter.getSessionManager().getActiveSession();
-    }
 
-    private void enviarFoto(String rutaFoto, final String texto){
-        File photo = null;
-        try {
-            photo = new File (rutaFoto);
-        } catch (Exception e) {
-            Log.d("miApp", "enviarImagen : excepcion: " + e.getMessage());
-            return;
-        } // catch
-// 3. obtenemos referencia al media service
-        MediaService ms = Twitter.getApiClient( obtenerSesionDeTwitter() ).getMediaService();
-// 3.1 ponemos la foto en el request body de la petición
-        okhttp3.RequestBody requestBody = okhttp3.RequestBody.create(MediaType.parse ("image/png"), photo);
-// 4. con el media service: enviamos la foto a Twitter
-        Call<Media> call1 = ms.upload(
-                requestBody, // foto que enviamos
-                null,
-                null);
-        call1.enqueue (new Callback<Media>() {
-            @Override
-            public void success(Result<Media> mediaResult) {
-// he tenido éxito:
-                Toast.makeText(THIS, "imagen publicada: " + mediaResult.response.toString(), Toast.LENGTH_LONG);
-// 5. como he tenido éxito, la foto está en twitter, pero no en el timeline (no se ve) he de escribir un tweet referenciando la foto
-                // 6. obtengo referencia al status service
-                StatusesService statusesService = TwitterCore.getInstance().getApiClient(obtenerSesionDeTwitter())
-                        .getStatusesService();
-// 7. publico un tweet
-                Call<Tweet> call2 = statusesService.update(texto , // mensaje del tweet
-                        null,
-                        false,
-                        null,
-                        null,
-                        null,
-                        true,
-                        false,
-                        ""+mediaResult.data.mediaId // string con los identicadores (hasta 4, separado por coma) de las imágenes
-// que quiero que aparezcan en este tweet. El mediaId referencia a la foto que acabo de subir previamente
-                );
-                call2.enqueue(
-                        new Callback<Tweet>() {
-                            @Override
-                            public void success(Result<Tweet> result) {
-                                Toast.makeText(THIS, "Tweet publicado: "+ result.response.message().toString(), Toast.LENGTH_LONG).show();
-                            }
-                            @Override
-                            public void failure(TwitterException e) {
-                                Toast.makeText(THIS, "No se pudo publicar el tweet: "+ e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                        });
-            }
-            @Override
-            public void failure(TwitterException e) {
-// failure de call1
-                Toast.makeText(THIS, "No se pudo publicar el tweet: "+ e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
 }

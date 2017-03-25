@@ -58,6 +58,9 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta1'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    compile('com.twitter.sdk.android:tweet-composer:2.3.1@aar') {
+        transitive = true;
+    }
     testCompile 'junit:junit:4.12'
     compile('com.twitter.sdk.android:twitter:2.3.2@aar') {
         transitive = true;
