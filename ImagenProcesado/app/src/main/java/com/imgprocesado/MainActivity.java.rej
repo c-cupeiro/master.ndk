@@ -1,7 +1,0 @@
-diff a/ImagenProcesado/app/src/main/java/com/imgprocesado/MainActivity.java b/ImagenProcesado/app/src/main/java/com/imgprocesado/MainActivity.java	(rejected hunks)
-@@ -554,4 +554,5 @@
-                 Toast.makeText(THIS, "No se pudo publicar el tweet: "+ e.getMessage(), Toast.LENGTH_LONG).show();
-             }
-         });
-+    }
- }

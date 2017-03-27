@@ -1,0 +1,18 @@
+Unidad 7:
+	7.1 Práctica: conversión a sepia  -->  SI
+	7.2 Desafío: ActionBar  -->  SI
+	7.3 Práctica: poner marco  -->  SI
+	7.4 Desafío: poner marco blanco o negro  -->  SI
+	7.5 Desafío: filtro de Sobel  -->  NO
+
+Unidad 8:
+	8.1 Práctica: identificarse en Facebook -->  SI
+	8.2 Práctica: publicar mensaje en Facebook  -->  SI
+	8.3 Práctica: publicar imagen procesada en Facebook  -->  SI
+	8.4 Desafío: publicar imagen procesada en Facebook mediante ShareDialog  -->  SI
+	8.5 Desafío: enviar tweets -->  SI 
+	8.6 Desafío: enviar imagen a Twitter  -->  SI
+	8.7 Desafío: responder al intent "PUBLICAR_FOTO_EN_FACEBOOK" -->  NO
+
+Desafío general: video de presentación -->  SI
+https://youtu.be/urEBEyB2chQ
